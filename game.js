@@ -59,6 +59,11 @@ function setup() {
     canvas.width = boardWidth;
     canvas.height = boardHeight;
     ctx = canvas.getContext('2d');
+    
+    // Mobile performance optimizations
+    ctx.imageSmoothingEnabled = false; // Better performance on mobile
+    ctx.webkitImageSmoothingEnabled = false;
+    ctx.mozImageSmoothingEnabled = false;
 
     // Load images (exact paths as per your Java code)
     backgroundImg = new Image();
@@ -72,13 +77,26 @@ function setup() {
 
     resetGame();
     
-    // Add event listeners for controls
-    document.addEventListener('touchstart', flap);
-    document.addEventListener('mousedown', flap);
+    // Add event listeners for controls - optimized for mobile
+    // Touch events
+    canvas.addEventListener('touchstart', flap, { passive: false });
+    canvas.addEventListener('touchend', function(e) { e.preventDefault(); }, { passive: false });
+    canvas.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
+    
+    // Mouse events for desktop
+    canvas.addEventListener('mousedown', flap);
+    canvas.addEventListener('click', flap);
+    
+    // Keyboard support
     document.addEventListener('keydown', function(e) {
         if (e.code === 'Space') {
             flap(e);
         }
+    });
+    
+    // Prevent context menu on long press
+    canvas.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
     });
 
     // Place Pipes Timer (every 1.5 seconds like your Java code)
@@ -195,13 +213,20 @@ function draw() {
     }
 }
 
-// Flap function (matching your keyPressed space)
+// Flap function (optimized for mobile touch)
 function flap(event) {
     if (event) {
         event.preventDefault();
+        event.stopPropagation();
     }
     
+    // More responsive flap for mobile
     velocityY = -9; // Same as your Java code
+    
+    // Add a slight vibration for mobile feedback (if supported)
+    if (navigator.vibrate) {
+        navigator.vibrate(10);
+    }
     
     if (gameOver) {
         // Restart the game by resetting conditions (exactly like your Java code)
