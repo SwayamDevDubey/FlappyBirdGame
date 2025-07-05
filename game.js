@@ -71,13 +71,20 @@ function setup() {
     bottomPipeImg.src = 'bottompipe.png';
 
     resetGame();
+    
+    // Add event listeners for controls
     document.addEventListener('touchstart', flap);
     document.addEventListener('mousedown', flap);
+    document.addEventListener('keydown', function(e) {
+        if (e.code === 'Space') {
+            flap(e);
+        }
+    });
 
-    // Place Pipes Timer
+    // Place Pipes Timer (every 1.5 seconds like your Java code)
     placePipesTimer = setInterval(placePipes, 1500);
 
-    // Game Loop
+    // Game Loop (60 FPS like your Java code)
     gameLoop = setInterval(gameLogic, 1000 / 60);
 }
 
@@ -87,8 +94,9 @@ function resetGame() {
     pipes = [];
     score = 0;
     gameOver = false;
+    velocityY = 0;
     clearInterval(gameLoop);
-    // No need to restart intervals as setup starts them
+    clearInterval(placePipesTimer);
 }
 
 // Game logic
@@ -103,33 +111,37 @@ function gameLogic() {
 
 // Move game objects
 function move() {
-    // Bird
+    // Bird movement (exactly like your Java code)
     velocityY += gravity;
     bird.y += velocityY;
     bird.y = Math.max(bird.y, 0);
 
-    // Pipes
+    // Pipes movement
     pipes.forEach(pipe => {
         pipe.x += velocityX;
 
+        // Score when bird passes pipe (exactly like your Java code)
         if (!pipe.passed && bird.x > pipe.x + pipe.width) {
             pipe.passed = true;
-            score += 0.5;
+            score += 0.5; // Same as your Java code
         }
 
+        // Check collision
         if (collision(bird, pipe)) {
             gameOver = true;
         }
     });
 
+    // Remove pipes that are off screen
     pipes = pipes.filter(pipe => pipe.x + pipe.width > 0);
 
+    // Check if bird hits bottom
     if (bird.y > boardHeight) {
         gameOver = true;
     }
 }
 
-// Detect collision
+// Detect collision (exactly like your Java collision method)
 function collision(a, b) {
     return a.x < b.x + b.width && // a's top left corner doesn't reach b's top right corner
            a.x + a.width > b.x && // a's top right corner doesn't reach b's left corner
@@ -137,15 +149,18 @@ function collision(a, b) {
            a.y + a.height > b.y; // a's bottom corner doesn't reach b's top corner
 }
 
-// Place pipes function (matching your Java code)
+// Place pipes function (matching your Java placePipes method)
 function placePipes() {
+    // Same random calculation as your Java code
     let randomPipeY = pipeY - pipeHeight / 4 - Math.random() * (pipeHeight / 2);
     let openingSpace = boardHeight / 3;
 
+    // Top pipe
     let topPipe = new Pipe(topPipeImg);
     topPipe.y = randomPipeY;
     pipes.push(topPipe);
 
+    // Bottom pipe
     let bottomPipe = new Pipe(bottomPipeImg);
     bottomPipe.y = topPipe.y + pipeHeight + openingSpace;
     pipes.push(bottomPipe);
@@ -154,17 +169,23 @@ function placePipes() {
 // Draw function (matching your Java paintComponent)
 function draw() {
     // Background
-    ctx.drawImage(backgroundImg, 0, 0, boardWidth, boardHeight);
+    if (backgroundImg.complete) {
+        ctx.drawImage(backgroundImg, 0, 0, boardWidth, boardHeight);
+    }
 
     // Bird
-    ctx.drawImage(bird.img, bird.x, bird.y, bird.width, bird.height);
+    if (birdImg.complete && bird) {
+        ctx.drawImage(bird.img, bird.x, bird.y, bird.width, bird.height);
+    }
 
     // Pipes
     pipes.forEach(pipe => {
-        ctx.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height);
+        if (pipe.img.complete) {
+            ctx.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height);
+        }
     });
 
-// Score
+    // Score (exactly like your Java code)
     ctx.fillStyle = 'white';
     ctx.font = '32px Arial';
     if (gameOver) {
@@ -176,11 +197,14 @@ function draw() {
 
 // Flap function (matching your keyPressed space)
 function flap(event) {
-    event.preventDefault();
+    if (event) {
+        event.preventDefault();
+    }
+    
     velocityY = -9; // Same as your Java code
     
     if (gameOver) {
-        // Restart the game by resetting conditions
+        // Restart the game by resetting conditions (exactly like your Java code)
         bird.y = birdY;
         velocityY = 0;
         pipes = [];
@@ -201,91 +225,6 @@ function startGame() {
 function restartGame() {
     document.getElementById('gameOverScreen').classList.add('hidden');
     setup();
-}
-
-// Go to start screen
-function goToStart() {
-    document.getElementById('gameOverScreen').classList.add('hidden');
-    document.getElementById('startScreen').classList.remove('hidden');
-}
-        createPipe();
-    }
-
-    pipes.forEach(pipe => {
-        pipe.x -= gameSpeed;
-
-        if (!pipe.passed && pipe.x + pipe.width < bird.x) {
-            score++;
-            pipe.passed = true;
-        }
-
-        ctx.fillStyle = '#4CAF50';
-        ctx.fillRect(pipe.x, 0, pipe.width, pipe.top);
-        ctx.fillRect(pipe.x, canvas.height - pipe.bottom, pipe.width, pipe.bottom);
-    });
-
-    pipes = pipes.filter(pipe => pipe.x + pipe.width > 0);
-}
-
-// Create new pipe
-function createPipe() {
-    const gap = 120;
-    const top = Math.random() * (canvas.height / 2);
-    pipes.push({
-        x: canvas.width,
-        top: top,
-        bottom: canvas.height - top - gap,
-        width: 40,
-        passed: false
-    });
-}
-
-// Check for collision
-function checkCollision() {
-    if (bird.y + bird.size > canvas.height || bird.y < 0) {
-        endGame();
-    }
-
-    pipes.forEach(pipe => {
-        if (bird.x < pipe.x + pipe.width &&
-            bird.x + bird.size > pipe.x &&
-            (bird.y < pipe.top || bird.y + bird.size > canvas.height - pipe.bottom)) {
-            endGame();
-        }
-    });
-}
-
-// End game
-function endGame() {
-    clearInterval(gameInterval);
-    document.removeEventListener('touchstart', flap);
-    document.removeEventListener('mousedown', flap);
-
-    highScore = Math.max(score, highScore);
-    localStorage.setItem('highScore', highScore);
-
-    document.getElementById('score').textContent = score;
-    document.getElementById('finalScore').textContent = 'Score: ' + score;
-    document.getElementById('highScore').textContent = 'High Score: ' + highScore;
-
-    document.getElementById('gameOverScreen').classList.remove('hidden');
-}
-
-// Start game
-function startGame() {
-    document.getElementById('startScreen').classList.add('hidden');
-    setup();
-}
-
-// Restart game
-function restartGame() {
-    document.getElementById('gameOverScreen').classList.add('hidden');
-    setup();
-}
-
-// Update score display
-function updateScore() {
-    document.getElementById('score').textContent = score;
 }
 
 // Go to start screen
