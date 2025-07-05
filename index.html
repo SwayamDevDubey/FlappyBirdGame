@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Flappy Bird - Mobile Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #87CEEB 0%, #98D8E8 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            max-width: 400px;
+            max-height: 600px;
+            background: linear-gradient(to bottom, #70c5ce 0%, #459ba8 70%, #8fbc8f 100%);
+            border: 2px solid #333;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .game-ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .score {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2em;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            pointer-events: none;
+        }
+
+        .start-screen, .game-over-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            pointer-events: all;
+        }
+
+        .start-screen h1, .game-over-screen h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .start-screen p, .game-over-screen p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            max-width: 300px;
+            line-height: 1.4;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1em;
+            color: rgba(255,255,255,0.8);
+            text-align: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 480px) {
+            .score {
+                font-size: 1.8em;
+                top: 15px;
+            }
+            
+            .start-screen h1, .game-over-screen h1 {
+                font-size: 2em;
+            }
+            
+            .start-screen p, .game-over-screen p {
+                font-size: 1em;
+                margin: 0 20px 20px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <canvas id="gameCanvas"></canvas>
+        
+        <div class="game-ui">
+            <div class="score" id="score">0</div>
+            
+            <div class="start-screen" id="startScreen">
+                <h1>🐦 Flappy Bird</h1>
+                <p>Tap anywhere to make the bird fly! Avoid the pipes and see how far you can go.</p>
+                <button class="btn" onclick="startGame()">Start Game</button>
+                <div class="instructions">
+                    <p>💡 Tap screen to fly<br>🎯 Avoid the green pipes<br>🏆 Beat your high score!</p>
+                </div>
+            </div>
+            
+            <div class="game-over-screen hidden" id="gameOverScreen">
+                <h1>Game Over!</h1>
+                <p id="finalScore">Score: 0</p>
+                <p id="highScore">High Score: 0</p>
+                <button class="btn" onclick="restartGame()">Play Again</button>
+                <button class="btn" onclick="goToStart()">Main Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
