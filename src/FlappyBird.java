@@ -57,7 +57,7 @@ public class FlappyBird extends JPanel implements ActionListener,KeyListener{
     //Game Logic
     Bird bird;
     int velocityX =-4;//moves pipes to the left speed
-    int velocityY=0;
+    int velocityY=-0;
     int gravity=1;
 
     ArrayList<Pipe> pipes;
@@ -103,7 +103,7 @@ public class FlappyBird extends JPanel implements ActionListener,KeyListener{
         //pipeHeight/4= 128
         //Math.random*pipeHeight?2= 0-128-(0-256)-->3/4pipeheight
         int randomPipeY= (int) (pipeY-pipeHeight/4-Math.random()*(pipeHeight/2));
-        int openingSpace=boardheight/4;
+        int openingSpace=boardheight/3;
 
         Pipe topPipe=new Pipe(topPeImg);
         topPipe.y=randomPipeY;
