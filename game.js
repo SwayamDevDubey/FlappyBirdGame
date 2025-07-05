@@ -77,27 +77,56 @@ function setup() {
 
     resetGame();
     
-    // Add event listeners for controls - optimized for mobile
-    // Touch events
-    canvas.addEventListener('touchstart', flap, { passive: false });
-    canvas.addEventListener('touchend', function(e) { e.preventDefault(); }, { passive: false });
-    canvas.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
+    // Enhanced touch handling for mobile responsiveness
+    let isTouch = false;
     
-    // Mouse events for desktop
-    canvas.addEventListener('mousedown', flap);
-    canvas.addEventListener('click', flap);
+    // Touch events with immediate response
+    canvas.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        isTouch = true;
+        flap(e);
+    }, { passive: false });
     
-    // Keyboard support
-    document.addEventListener('keydown', function(e) {
-        if (e.code === 'Space') {
+    canvas.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }, { passive: false });
+    
+    canvas.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }, { passive: false });
+    
+    // Mouse events for desktop (but not if touch is being used)
+    canvas.addEventListener('mousedown', function(e) {
+        if (!isTouch) {
             flap(e);
         }
     });
     
-    // Prevent context menu on long press
+    canvas.addEventListener('click', function(e) {
+        if (!isTouch) {
+            flap(e);
+        }
+    });
+    
+    // Keyboard support
+    document.addEventListener('keydown', function(e) {
+        if (e.code === 'Space' || e.key === ' ') {
+            e.preventDefault();
+            flap(e);
+        }
+    });
+    
+    // Prevent context menu and other mobile browser behaviors
     canvas.addEventListener('contextmenu', function(e) {
         e.preventDefault();
+        return false;
     });
+    
+    // Reset touch flag after a delay
+    setTimeout(() => { isTouch = false; }, 1000);
 
     // Place Pipes Timer (every 1.5 seconds like your Java code)
     placePipesTimer = setInterval(placePipes, 1500);
@@ -211,23 +240,22 @@ function draw() {
     } else {
         ctx.fillText(Math.floor(score), 10, 35);
     }
+    
+    // Update HTML score display
+    updateScore();
 }
 
-// Flap function (optimized for mobile touch)
+// Flap function (optimized for instant mobile response)
 function flap(event) {
-    if (event) {
-        event.preventDefault();
-        event.stopPropagation();
-    }
-    
-    // More responsive flap for mobile
+    // Immediate response - no checks needed
     velocityY = -9; // Same as your Java code
     
-    // Add a slight vibration for mobile feedback (if supported)
-    if (navigator.vibrate) {
-        navigator.vibrate(10);
+    // Optional haptic feedback for mobile
+    if (navigator.vibrate && 'ontouchstart' in window) {
+        navigator.vibrate(8);
     }
     
+    // Game restart on game over
     if (gameOver) {
         // Restart the game by resetting conditions (exactly like your Java code)
         bird.y = birdY;
@@ -238,6 +266,8 @@ function flap(event) {
         placePipesTimer = setInterval(placePipes, 1500);
         gameLoop = setInterval(gameLogic, 1000 / 60);
     }
+    
+    return false; // Prevent any default behavior
 }
 
 // Start game
@@ -250,6 +280,14 @@ function startGame() {
 function restartGame() {
     document.getElementById('gameOverScreen').classList.add('hidden');
     setup();
+}
+
+// Update score display
+function updateScore() {
+    const scoreElement = document.getElementById('score');
+    if (scoreElement) {
+        scoreElement.textContent = Math.floor(score);
+    }
 }
 
 // Go to start screen
